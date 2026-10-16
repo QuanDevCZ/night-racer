@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Night Racer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="loading">BUILDING THE CITY…</div>
+
+  <div id="hud" class="hidden">
+    <div class="panel tl">
+      <div class="pos"><span id="pos">4</span><small id="pos-of">/4</small></div>
+      <div class="lapbox"><span class="lbl">LAP</span><span id="lap">1</span><small id="laps">/3</small></div>
+      <dl class="times">
+        <dt>TIME</dt><dd id="t-total">00:00.00</dd>
+        <dt>LAP</dt><dd id="t-lap">00:00.00</dd>
+        <dt>BEST</dt><dd id="t-best">--:--.--</dd>
+      </dl>
+    </div>
+    <div class="tr">
+      <canvas id="minimap" width="220" height="220"></canvas>
+      <ol id="standings"></ol>
+    </div>
+    <div id="boost" class="panel">
+      <span class="lbl">BOOST <kbd>SHIFT</kbd></span>
+      <div class="cells"><div class="cell"><i></i></div><div class="cell"><i></i></div><div class="cell"><i></i></div></div>
+    </div>
+    <canvas id="speedo" width="260" height="260"></canvas>
+    <div id="alert"></div>
+    <div id="banner"></div>
+    <div id="split"></div>
+  </div>
+
+  <div id="menu" class="overlay">
+    <div class="card">
+      <h1>NIGHT<span>RACER</span></h1>
+      <p class="sub">3 laps · 4 cars · one neon street circuit</p>
+      <button id="btn-start" class="primary">START RACE <kbd>ENTER</kbd></button>
+      <div class="controls">
+        <div><kbd>W</kbd><kbd>↑</kbd> throttle</div>
+        <div><kbd>S</kbd><kbd>↓</kbd> brake / reverse</div>
+        <div><kbd>A</kbd><kbd>D</kbd> steer</div>
+        <div><kbd>SPACE</kbd> handbrake drift</div>
+        <div><kbd>SHIFT</kbd> boost (3 charges)</div>
+        <div><kbd>C</kbd> camera · <kbd>R</kbd> respawn</div>
+        <div><kbd>ESC</kbd> pause · <kbd>M</kbd> mute</div>
+        <div class="pad">🎮 RT/LT · stick · A drift · B boost · Y cam</div>
+      </div>
+      <p class="tip">Drifting refills boost faster.</p>
+    </div>
+  </div>
+
+  <div id="pause" class="overlay hidden">
+    <div class="card small">
+      <h2>PAUSED</h2>
+      <button id="btn-resume" class="primary">RESUME <kbd>ESC</kbd></button>
+      <button id="btn-restart">RESTART <kbd>R</kbd></button>
+      <button id="btn-quit">MAIN MENU</button>
+    </div>
+  </div>
+
+  <div id="results" class="overlay hidden">
+    <div class="card">
+      <h2 id="results-title">RESULTS</h2>
+      <table>
+        <thead><tr><th>POS</th><th>DRIVER</th><th>TIME</th><th>BEST LAP</th></tr></thead>
+        <tbody id="results-body"></tbody>
+      </table>
+      <button id="btn-again" class="primary">RACE AGAIN <kbd>ENTER</kbd></button>
+      <button id="btn-menu">MAIN MENU</button>
+    </div>
+  </div>
+
+  <div id="mute">MUTED</div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

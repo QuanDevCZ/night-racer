@@ -1,0 +1,92 @@
+NIGHT RACER — plan
+==================
+
+Goal
+----
+A complete, playable 3D arcade street-racing game in the browser. Night-city street
+circuit, player vs 3 AI rivals, 3 laps. Everything procedural: geometry, textures,
+lighting, and all audio synthesized live with the Web Audio API (no asset files).
+
+Decisions (from the interview, 2026-10-14)
+------------------------------------------
+- Stack: zero-dependency ES modules. index.html + src/*.js, Three.js r160 (plus its
+  examples/jsm addons for post-processing) loaded from the jsDelivr CDN through an importmap.
+  No bundler, no install. Serve with `npx serve .`
+- Look: night city. Wet, reflective tarmac, neon-striped barriers, street lights with
+  light pools on the road, procedurally windowed skyscrapers, neon signs, a distant
+  mountain silhouette, and bloom.
+- Format: 1 hand-tuned procedural circuit, 3 laps, 4 cars (player + 3 AI), a countdown
+  start and a results screen.
+- Controls: keyboard plus a gamepad (Gamepad API), smooth chase cam, C toggles the bumper cam.
+
+Architecture
+------------
+Pure logic (no DOM, no Three.js, unit-tested in Node):
+  src/core/rng.js      seeded PRNG (mulberry32)
+  src/core/layout.js   track control points + global constants (widths, laps)
+  src/core/track.js    closed centripetal Catmull-Rom spline, arc-length resampling,
+                       tangents/normals/curvature, nearest-point query with hint,
+                       AI speed profile (corner limit + backward brake pass)
+  src/core/physics.js  arcade kinematic bicycle model: signed speed and reverse,
+                       speed-limited steering, grip/slip, handbrake drift state,
+                       3-charge boost (passive + drift recharge), off-road penalty,
+                       wall collision with scrape output, car-vs-car push, gearbox/rpm
+  src/core/race.js     ordered checkpoints, lap counting and lap times, unwrapped
+                       progress, ranking, wrong-way and off-track detectors
+  src/core/ai.js       pure-pursuit steering on a lane offset, speed profile throttle
+                       and brake, overtaking lane shift, boost use on straights,
+                       stuck recovery
+
+Browser side:
+  src/main.js    bootstrap, game state machine (menu > countdown > racing >
+                 finished, plus pause), fixed-step physics loop, chase or bumper camera,
+                 dynamic FOV
+  src/world.js   road, curbs, sidewalks, barriers, start gantry, buildings, signs,
+                 street lights with road light pools, mountains, sky, env map
+  src/cars.js    procedural low-poly car meshes (wheels spin and steer, body roll,
+                 head and tail lights, underglow, blob shadow)
+  src/fx.js      particle pools (sparks, boost flames, tire smoke), skid marks,
+                 speed streak lines
+  src/post.js    EffectComposer: bloom + radial motion blur/vignette shader
+  src/audio.js   synth engine (player + AI), drift screech, scrape, boost whoosh,
+                 collision thud, wind, UI chimes
+  src/hud.js     DOM HUD: position, lap, timers, speedometer canvas, boost cells,
+                 minimap canvas, alerts, menus/results
+  src/input.js   keyboard + gamepad merged into one input object
+
+Controls
+--------
+W/Up throttle, S/Down brake/reverse, A/D or Left/Right steer, Space handbrake,
+Shift boost, C camera, R respawn, Esc/P pause, M mute, Enter start/restart.
+Gamepad: RT throttle, LT brake, left stick steer, A/Cross handbrake, B/Circle or
+X/Square boost, Y camera, Start pause.
+
+Tests (node --test, zero deps)
+------------------------------
+- track: closed loop, uniform spacing, no wall overlap between distant parts,
+  nearest() accuracy, speed profile bounded
+- physics: acceleration and top speed, braking into signed reverse, reverse steering
+  inverts the turn, steering direction, handbrake drift creates slip, boost charges
+  (use, duration, recharge, cap 3), walls keep the car inside and report scrapes,
+  car-car push separates
+- race: checkpoints must be passed in order, lap counting and times, ranking,
+  wrong-way detection
+- ai: headless simulation of 3 AI cars completes 3 laps on the real track
+
+Done when
+---------
+npm test passes; the game runs in Chrome via npx serve with no console errors,
+and a full race can be played from menu to results.
+
+Status (2026-10-14)
+-------------------
+Built as planned. npm test: 25/25 pass. Verified in Chrome via npx serve: menu with attract-mode demo
+race, countdown with gantry start lights, racing with HUD/minimap/standings, boost (charge use + speed
+gain), handbrake drift (slip ~0.33 rad), wrong-way and off-track alerts, a full autopilot race through
+lap 3 with lap times recorded and no console errors. ~61 fps on Intel UHD 620 after adding adaptive
+pixel ratio. Not yet observed in the browser: the results screen after the finish line (the test tab
+closed at lap 3).
+Changes vs plan: added src/core/sim.js (shared race tick) and adaptive resolution.
+
+Change (2026-10-16): checkpoint / lap split popup (#split) moved from under screen centre to the
+top centre between the timing panel and minimap, so it no longer covers the road.
