@@ -4,10 +4,12 @@ A 3D arcade street racer that runs in the browser. It's a night-city circuit wit
 All the geometry, textures and lighting are procedural, and every sound is synthesized live with the Web Audio
 API. There are no asset files.
 
+**Play it live:** https://quandevcz.github.io/night-racer/ (keyboard or gamepad; press Enter to start)
+
 ## Run
 
 ```bash
-npx serve .      # then open the printed http://localhost URL
+npm run dev      # serves on http://localhost:4321
 npm test         # 25 Node tests, zero dependencies
 ```
 
